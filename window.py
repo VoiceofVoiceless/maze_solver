@@ -1,5 +1,6 @@
 from tkinter import Tk, BOTH, Canvas
 import time
+import random
 class Window:
     def __init__(self, width, height):
         self.__root = Tk()
@@ -55,6 +56,7 @@ class Cell:
         self.__x2 = -1
         self.__y1 = -1
         self.__y2 = -1
+        self.__visited = False
 
     def draw(self, x, y, width, height):
         self.__x1 = x
@@ -112,9 +114,29 @@ class Cell:
             line = Line(center_cell, center_to_cell)
             if self.__win:
                 self.__win.draw_line(line, color="red")
+    
+    def __break_walls_r(self, i, j):
+        self.__visited = True
+        while True:
+            need_to_visit = []
+            if i > 0 and not self.__cells[i - 1][j].__visited:
+                need_to_visit.append((i - 1, j))
+            if i < len(self.__cells) - 1 and not self.__cells[i + 1][j].__visited:
+                need_to_visit.append((i + 1, j))
+            if j > 0 and not self.__cells[i][j - 1].__visited:
+                need_to_visit.append((i, j - 1))
+            if j < len(self.__cells[0]) - 1 and not self.__cells[i][j + 1].__visited:
+                need_to_visit.append((i, j + 1))
+            if not need_to_visit:
+                self.draw(self.__x1, self.__y1, self.__cell_size_x, self.__cell_size_y)
+                return
+            next_cell = random.choice(need_to_visit)
+
+
 
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win=None):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win=None, seed=None):
+        self.__seed = seed
         self.__x1 = x1
         self.__y1 = y1
         self.__num_rows = num_rows
@@ -125,6 +147,8 @@ class Maze:
         self.__cells = []
         self.__create_cells()
         self.__break_entrance_and_exit()
+        if self.__seed:
+            random.seed(seed)
     
     def __create_cells(self):
         for i in range(self.__num_cols):
