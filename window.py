@@ -45,7 +45,7 @@ class Line:
         canvas.create_line( self.pointx, self.pointy, self.point2x, self.point2y, fill=color, width=2)
 
 class Cell:
-    def __init__(self, window):
+    def __init__(self, window=None):
         self.__win = window
         self.has_left_wall = True
         self.has_top_wall = True
@@ -63,16 +63,20 @@ class Cell:
         self.__y2 = y + height
         if self.has_left_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
-            self.__win.draw_line(line)
+            if self.__win:
+                self.__win.draw_line(line)
         if self.has_top_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
-            self.__win.draw_line(line)
+            if self.__win:
+                self.__win.draw_line(line)
         if self.has_right_wall:
             line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
-            self.__win.draw_line(line)
+            if self.__win:
+                self.__win.draw_line(line)
         if self.has_bottom_wall:
             line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
-            self.__win.draw_line(line)
+            if self.__win:
+                self.__win.draw_line(line)
 
     def get_center(self):
         return Point(((self.__x2 + self.__x1) / 2), ((self.__y2 + self.__y1) / 2))
@@ -82,13 +86,16 @@ class Cell:
         center_cell = self.get_center()
         if undo:
             line = Line(center_to_cell, center_cell)
-            self.__win.draw_line(line, color="gray")
+            if self.__win:
+                self.__win.draw_line(line, color="gray")
+            
         else:
             line = Line(center_cell, center_to_cell)
-            self.__win.draw_line(line, color="red")
+            if self.__win:
+                self.__win.draw_line(line, color="red")
 
 class Maze:
-    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win,):
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win=None):
         self.__x1 = x1
         self.__y1 = y1
         self.__num_rows = num_rows
@@ -100,26 +107,29 @@ class Maze:
         self.__create_cells()
     
     def __create_cells(self):
-        for i in range(self.__num_rows):
-            row = []
-            for j in range(self.__num_cols):
+        for i in range(self.__num_cols):
+            column = []
+            for j in range(self.__num_rows):
                 cell = Cell(self.__win)
                 cell.has_left_wall = True
                 cell.has_top_wall = True
                 cell.has_right_wall = True
                 cell.has_bottom_wall = True
-                row.append(cell)
-            self.__cells.append(row)
-        self.__draw_cell(column=self.__num_cols, row=self.__num_rows)
+                column.append(cell)
+            self.__cells.append(column)
+        for i in range(self.__num_cols):
+            for j in range(self.__num_rows):
+                self.__draw_cell(column=i, row=j)
     
     def __draw_cell(self, column, row):
-        cell = self.__cells[row][column]
+        cell = self.__cells[column][row]
         cell.draw(self.__x1 + (column * self.__cell_size_x), self.__y1 + (row * self.__cell_size_y), self.__cell_size_x, self.__cell_size_y)
         self.animate()
     
     def animate(self):
-        self.__win.redraw()
-        time.sleep(0.05)
+        if self.__win:
+            self.__win.redraw()
+        time.sleep(0.0333)  # 30 FPS
 
 
 
@@ -128,34 +138,6 @@ class Maze:
 
             
 win = Window(800, 600)
-line1 = Line(Point(100, 100), Point(200, 200))
-line2 = Line(Point(200, 100), Point(100, 200))
-win.draw_line(line1, "red")
-win.draw_line(line2, "blue")
-win.redraw()
-cell = Cell(win)
-cell.has_left_wall = True
-cell.has_top_wall = True
-cell.has_right_wall = True
-cell.has_bottom_wall = True
-cell.draw(100, 100, 50, 50)
-cell2 = Cell(win)
-cell.draw_move(cell, undo=True)
-cell2.has_left_wall = True
-cell2.has_top_wall = True
-cell2.has_right_wall = True
-cell2.has_bottom_wall = True
-cell2.draw(200, 100, 50, 50)
-cell3 = Cell(win)
-cell3.has_left_wall = True
-cell3.has_top_wall = True
-cell3.has_right_wall = True
-cell3.has_bottom_wall = True
-cell3.draw(100, 200, 50, 50)
-cell.draw_move(cell2)
-cell2.draw_move(cell3)
-cell3.draw_move(cell, undo=True)
-cell3.draw_move(cell2, undo=True)
-win.redraw()
+maze = Maze(50, 50, 10, 10, 50, 50, win)
 # Keep the window open until closed
 win.wait_for_close()
