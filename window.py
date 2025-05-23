@@ -74,6 +74,20 @@ class Cell:
             line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
             self.__win.draw_line(line)
 
+    def get_center(self):
+        return Point(((self.__x2 + self.__x1) / 2), ((self.__y2 + self.__y1) / 2))
+    
+    def draw_move(self, to_cell, undo=False):
+        center_to_cell = to_cell.get_center()
+        center_cell = self.get_center()
+        if undo:
+            line = Line(center_to_cell, center_cell)
+            self.__win.draw_line(line, color="gray")
+        else:
+            line = Line(center_cell, center_to_cell)
+            self.__win.draw_line(line, color="red")
+
+
             
 win = Window(800, 600)
 line1 = Line(Point(100, 100), Point(200, 200))
@@ -88,6 +102,7 @@ cell.has_right_wall = True
 cell.has_bottom_wall = True
 cell.draw(100, 100, 50, 50)
 cell2 = Cell(win)
+cell.draw_move(cell, undo=True)
 cell2.has_left_wall = True
 cell2.has_top_wall = True
 cell2.has_right_wall = True
@@ -99,6 +114,10 @@ cell3.has_top_wall = True
 cell3.has_right_wall = True
 cell3.has_bottom_wall = True
 cell3.draw(100, 200, 50, 50)
+cell.draw_move(cell2)
+cell2.draw_move(cell3)
+cell3.draw_move(cell, undo=True)
+cell3.draw_move(cell2, undo=True)
 win.redraw()
 # Keep the window open until closed
 win.wait_for_close()
