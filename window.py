@@ -1,5 +1,5 @@
 from tkinter import Tk, BOTH, Canvas
-
+import time
 class Window:
     def __init__(self, width, height):
         self.__root = Tk()
@@ -86,6 +86,44 @@ class Cell:
         else:
             line = Line(center_cell, center_to_cell)
             self.__win.draw_line(line, color="red")
+
+class Maze:
+    def __init__(self, x1, y1, num_rows, num_cols, cell_size_x, cell_size_y, win,):
+        self.__x1 = x1
+        self.__y1 = y1
+        self.__num_rows = num_rows
+        self.__num_cols = num_cols
+        self.__cell_size_x = cell_size_x
+        self.__cell_size_y = cell_size_y
+        self.__win = win
+        self.__cells = []
+        self.__create_cells()
+    
+    def __create_cells(self):
+        for i in range(self.__num_rows):
+            row = []
+            for j in range(self.__num_cols):
+                cell = Cell(self.__win)
+                cell.has_left_wall = True
+                cell.has_top_wall = True
+                cell.has_right_wall = True
+                cell.has_bottom_wall = True
+                row.append(cell)
+            self.__cells.append(row)
+        self.__draw_cell(column=self.__num_cols, row=self.__num_rows)
+    
+    def __draw_cell(self, column, row):
+        cell = self.__cells[row][column]
+        cell.draw(self.__x1 + (column * self.__cell_size_x), self.__y1 + (row * self.__cell_size_y), self.__cell_size_x, self.__cell_size_y)
+        self.animate()
+    
+    def animate(self):
+        self.__win.redraw()
+        time.sleep(0.05)
+
+
+
+
 
 
             
