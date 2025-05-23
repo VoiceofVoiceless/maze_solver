@@ -65,18 +65,37 @@ class Cell:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
             if self.__win:
                 self.__win.draw_line(line)
+        elif not self.has_left_wall:
+            line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
+            if self.__win:
+                self.__win.draw_line(line, color="green")
+
         if self.has_top_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
             if self.__win:
                 self.__win.draw_line(line)
+        elif not self.has_top_wall:
+            line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
+            if self.__win:
+                self.__win.draw_line(line, color="green")
+
         if self.has_right_wall:
             line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
             if self.__win:
                 self.__win.draw_line(line)
+        elif not self.has_right_wall:
+            line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
+            if self.__win:
+                self.__win.draw_line(line, color="green")
+
         if self.has_bottom_wall:
             line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
             if self.__win:
                 self.__win.draw_line(line)
+        elif not self.has_bottom_wall:
+            line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
+            if self.__win:
+                self.__win.draw_line(line, color="green")
 
     def get_center(self):
         return Point(((self.__x2 + self.__x1) / 2), ((self.__y2 + self.__y1) / 2))
@@ -105,6 +124,7 @@ class Maze:
         self.__win = win
         self.__cells = []
         self.__create_cells()
+        self.__break_entrance_and_exit()
     
     def __create_cells(self):
         for i in range(self.__num_cols):
@@ -130,6 +150,13 @@ class Maze:
         if self.__win:
             self.__win.redraw()
         time.sleep(0.0333)  # 30 FPS
+
+    def __break_entrance_and_exit(self):
+        self.__cells[0][0].has_top_wall = False
+        self.__draw_cell(0, 0)
+        self.__cells[self.__num_cols - 1][self.__num_rows - 1].has_bottom_wall = False
+        self.__draw_cell(self.__num_cols - 1, self.__num_rows - 1)
+
 
 
 
