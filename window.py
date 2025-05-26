@@ -70,7 +70,7 @@ class Cell:
         elif not self.has_left_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x1, self.__y2))
             if self.__win:
-                self.__win.draw_line(line, color="green")
+                self.__win.draw_line(line, color="black")
 
         if self.has_top_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
@@ -79,7 +79,7 @@ class Cell:
         elif not self.has_top_wall:
             line = Line(Point(self.__x1, self.__y1), Point(self.__x2, self.__y1))
             if self.__win:
-                self.__win.draw_line(line, color="green")
+                self.__win.draw_line(line, color="black")
 
         if self.has_right_wall:
             line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
@@ -88,7 +88,7 @@ class Cell:
         elif not self.has_right_wall:
             line = Line(Point(self.__x2, self.__y1), Point(self.__x2, self.__y2))
             if self.__win:
-                self.__win.draw_line(line, color="green")
+                self.__win.draw_line(line, color="black")
 
         if self.has_bottom_wall:
             line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
@@ -97,7 +97,7 @@ class Cell:
         elif not self.has_bottom_wall:
             line = Line(Point(self.__x1, self.__y2), Point(self.__x2, self.__y2))
             if self.__win:
-                self.__win.draw_line(line, color="green")
+                self.__win.draw_line(line, color="black")
 
     def get_center(self):
         return Point(((self.__x2 + self.__x1) / 2), ((self.__y2 + self.__y1) / 2))
@@ -134,6 +134,16 @@ class Maze:
         if self.__seed:
             random.seed(seed)
         self.__break_walls_r(0, 0)
+        self.__reset_cells_visited()
+        self.solve()
+
+    def solve(self):
+        self.__reset_cells_visited()
+        if self._solve_r(0, 0):
+            print("Solution found!")
+        else:
+            print("No solution found.")
+        
     
     def __create_cells(self):
         for i in range(self.__num_cols):
@@ -198,7 +208,42 @@ class Maze:
                 current_cell.has_bottom_wall = False
                 next_cell.has_top_wall = False
             next_cell.draw_move(current_cell, undo=False)
-            self.__break_walls_r(next_i, next_j)    
+            self.__break_walls_r(next_i, next_j)
+
+    def __reset_cells_visited(self):
+        for column in self.__cells:
+            for cell in column:
+                cell.visited = False
+    
+    def _solve_r(self, i, j):
+        current_cell = self.__cells[i][j]
+        self.animate()
+        current_cell.visited = True
+        if self.__cells[self.__num_cols - 1][self.__num_rows - 1] == current_cell and current_cell.visited:
+            return True 
+        left_cell = (i - 1, j)
+        right_cell = (i + 1, j)
+        top_cell = (i, j - 1)
+        bottom_cell = (i, j + 1)
+        directions = [left_cell, right_cell, top_cell, bottom_cell]
+        for direction in directions:
+            next_i, next_j = direction
+            if 0 <= next_i < self.__num_cols and 0 <= next_j < self.__num_rows:
+                next_cell = self.__cells[next_i][next_j]
+                if not next_cell.visited:
+                # Check if the wall in the direction is broken
+                    if (next_i < i and not current_cell.has_left_wall) or \
+                        (next_i > i and not current_cell.has_right_wall) or \
+                        (next_j < j and not current_cell.has_top_wall) or \
+                        (next_j > j and not current_cell.has_bottom_wall):
+                    # Move to the next cell
+                    # Draw the move
+                        current_cell.draw_move(next_cell, undo=False)
+                        if self._solve_r(next_i, next_j):
+                            return True
+                        else:
+                            next_cell.draw_move(current_cell, undo=True)
+        return False
 
 
 
@@ -209,5 +254,6 @@ class Maze:
             
 win = Window(800, 600)
 maze = Maze(50, 50, 10, 10, 50, 50, win)
+maze.solve()
 # Keep the window open until closed
 win.wait_for_close()
